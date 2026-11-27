@@ -95,6 +95,12 @@ button:disabled{opacity:.45}
     </div>
   </section>
 
+  <!-- ご注文の確認と同意 -->
+  <section class="card" data-step="order" hidden>
+    <h2>ご注文内容</h2>
+    <div id="orderBody"></div>
+  </section>
+
   <!-- 受付済み -->
   <section class="card" data-step="pending" hidden>
     <div class="done-mark">✓</div>
@@ -261,7 +267,7 @@ function show(name) {
   $('bar').innerHTML = STEPS.map((_, i) => `<i class="${i < n ? 'on' : ''}"></i>`).join('');
   $('stepname').textContent = n ? `${n} / ${STEPS.length}　${STEPS[n - 1]}` : '';
   $('nav').hidden = !n;
-  $('stepname').hidden = $('bar').hidden = name === 'book';
+  $('stepname').hidden = $('bar').hidden = name === 'book' || name === 'order';
   if (n) { $('back').hidden = n === 1; $('next').textContent = n === STEPS.length ? 'この内容で送信する' : '次へ'; }
   window.scrollTo(0, 0);
 }
@@ -404,6 +410,43 @@ async function bookCancel() {
   if (!confirm('申し込みを取り消しますか？')) return;
   try { const r = await api({action: 'book_cancel', idToken: liff.getIDToken() || idToken}); alert(r.message); await bookStart(); } catch (e) { msg(e.message); }
 }
+// ---- ご注文の確認と同意 ----
+const ORDER_ID = new URLSearchParams(location.search).get('id') || '';
+let orderData = null;
+function esc(t) { return String(t).replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c])); }
+async function orderStart() {
+  document.querySelector('h1').textContent = 'ご注文内容の確認'; document.querySelector('.lead').textContent = 'お薬の説明とお支払い総額をご確認ください'; document.title = 'ご注文内容の確認｜Squeeze Clinic';
+  orderData = MOCK ? {orderId: 'SQ-MOCK', status: '同意待ち', plan: 'まとめ買い（3か月分）', items: ['マンジャロ 2.5mg・12本（3か月分）：25,021円（税込）'], usage: 'マンジャロ：週1回、同じ曜日に皮下注射してください。', total: 25021,
+    docs: [{key: 'TIRZEPATIDE', title: 'マンジャロ（チルゼパチド）の説明書', version: 'v1.0', text: '（画面確認用のダミー本文）\n'.repeat(12)}], terms: ['お支払いはクレジットカードのみです。', '発送後の返品・キャンセル・返金はお受けできません。'], docHash: 'x'}
+    : await api({action: 'order_init', idToken, orderId: ORDER_ID});
+  orderRender(); show('order');
+}
+function orderRender() {
+  const d = orderData, box = $('orderBody');
+  if (d.done) { box.innerHTML = '<div class="done-mark">✓</div><p class="center">' + esc(d.message) + '</p><button class="primary" style="width:100%" onclick="closeApp()">閉じる</button>'; return; }
+  box.innerHTML = (d.testMode ? '<p class="hint">現在はテスト期間です（架空の注文）。</p>' : '') +
+    '<p class="hint">購入方法：' + esc(d.plan) + '</p>' +
+    d.items.map(l => '<p style="margin:6px 0"><b>' + esc(l.replace(/：.*$/, '')) + '</b><br>' + esc(l.replace(/^.*：/, '')) + '</p>').join('') +
+    '<p style="font-size:20px;margin:14px 0"><b>お支払い総額 ' + d.total.toLocaleString('ja-JP') + '円</b><br><span class="hint">税込・送料込み・診察料0円</span></p>' +
+    (d.usage ? '<details><summary>使用方法</summary><div class="doc">' + esc(d.usage) + '</div></details>' : '') +
+    d.docs.map(x => '<details class="orderdoc"><summary>' + esc(x.title) + '</summary><div class="doc">' + esc(x.text) + '</div></details>').join('') +
+    '<details open><summary>ご購入にあたって</summary><div class="doc">' + d.terms.map(t => '・' + esc(t)).join('\n') + '</div></details>' +
+    '<label class="check"><input type="checkbox" id="oRead"> お薬の説明書を読み、内容を理解しました</label>' +
+    '<label class="check"><input type="checkbox" id="oAgree"> ご注文内容・お支払い総額・ご購入の条件に同意します</label>' +
+    '<button class="primary" style="width:100%" id="oBtn">同意して、お支払いへ進む</button>';
+  box.querySelectorAll('details.orderdoc').forEach(el => el.addEventListener('toggle', () => { if (el.open) el.classList.add('read'); }));
+  $('oBtn').onclick = orderAgree;
+}
+async function orderAgree() {
+  if (!$('oRead').checked || !$('oAgree').checked) { msg('すべての確認項目にチェックしてください。'); return; }
+  if (orderData.docs.length && document.querySelectorAll('details.orderdoc.read').length < orderData.docs.length) { msg('お薬の説明書をすべて開いてお読みください。'); return; }
+  $('oBtn').disabled = true; msg('送信しています…');
+  try {
+    const r = MOCK ? {message: 'ご同意ありがとうございます。お支払い用のリンクを、このLINEで数分以内にお送りします。'}
+      : await api({action: 'order_agree', idToken: liff.getIDToken() || idToken, orderId: ORDER_ID, docHash: orderData.docHash, read: true, agree: true});
+    msg(''); orderData = {done: true, message: r.message}; orderRender(); window.scrollTo(0, 0);
+  } catch (e) { msg(e.message); $('oBtn').disabled = false; }
+}
 function closeApp() { try { liff.closeWindow(); } catch (e) { window.close(); } }
 
 async function submit() {
@@ -429,6 +472,7 @@ async function start() {
     if (!MOCK && !liff.isLoggedIn()) { liff.login({redirectUri: location.href}); return; }
     idToken = MOCK ? 'mock' : liff.getIDToken();
     if (VIEW === 'book') { await bookStart(); return; }
+    if (VIEW === 'order') { await orderStart(); return; }
     const data = await api({action: 'init', idToken});
     if (data.testMode) $('testNote').hidden = false;
     docs = data.docs; docHash = data.docHash;
