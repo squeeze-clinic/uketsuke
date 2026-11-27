@@ -378,7 +378,7 @@ function bookRender() {
   if (c) {
     const box = document.createElement('div'); box.className = 'booked';
     box.innerHTML = (c.state === '確定' ? '<b>ご予約は確定しています</b>' : '<b>医師の確認待ちです</b>') + '<br>' + c.label +
-      (c.state === '確定' ? '<p class="hint">時間になりましたら、このLINEにビデオ通話でおかけします。変更はこのLINEでお知らせください。</p>' : '<p class="hint">別の時間に変えたいときは、下から選び直してください（今の申し込みは取り消されます）。</p>');
+      (c.state === '確定' ? '<p class="hint">予約の時間になったら、LINEのトーク画面の右下の電話マークから「ビデオ通話」で当院におかけください。変更はこのLINEでお知らせください。</p>' : '<p class="hint">別の時間に変えたいときは、下から選び直してください（今の申し込みは取り消されます）。</p>');
     if (c.state === '承認待ち') { const b = document.createElement('button'); b.className = 'secondary'; b.style.width = '100%'; b.textContent = '申し込みを取り消す'; b.onclick = bookCancel; box.appendChild(b); }
     $('bookCurrent').appendChild(box);
   }
