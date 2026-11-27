@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>はじめての方｜Squeeze Clinic</title>
+<style>
+*{box-sizing:border-box}
+:root{--navy:#14284F;--blue:#2B6CB0;--line:#9CC3E6;--pale:#EAF3FC;--warn:#E3A857;--green:#06C755;--err:#B42318}
+body{margin:0;font:17px/1.8 -apple-system,"Hiragino Sans","Noto Sans JP",sans-serif;color:var(--navy);background:linear-gradient(180deg,#F4F9FD,#E3EFF9);min-height:100vh}
+main{max-width:640px;margin:0 auto;padding:14px 14px 120px}
+.card{background:#fff;border-radius:20px;padding:20px 16px;box-shadow:0 8px 24px rgba(43,108,176,.10);margin-bottom:14px}
+.logo{display:block;height:44px;margin:4px auto 2px}
+h1{font-size:22px;text-align:center;margin:6px 0 2px;letter-spacing:.06em}
+.lead{text-align:center;font-size:14px;color:#4a5f80;margin:0}
+.bar{display:flex;gap:4px;margin:14px 0 4px}.bar i{flex:1;height:6px;border-radius:3px;background:#d8e5f2}.bar i.on{background:var(--blue)}
+.stepname{text-align:center;font-size:13px;color:#4a5f80}
+h2{font-size:19px;margin:0 0 10px;padding:4px 12px;border-left:5px solid var(--blue);background:var(--pale);border-radius:0 10px 10px 0}
+label.f{display:block;font-weight:700;margin:16px 0 4px;font-size:16px}
+label.f small{font-weight:400;color:#4a5f80;margin-left:4px}
+.req{color:var(--err);font-size:12px;margin-left:4px}
+input[type=text],input[type=tel],input[type=email],input[type=date],textarea,select{width:100%;font:inherit;font-size:17px;padding:11px 12px;border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--navy)}
+textarea{min-height:84px;resize:vertical}
+input:focus,textarea:focus,select:focus{outline:3px solid #BFDBF7}
+.hint{font-size:13.5px;color:#4a5f80;margin:4px 0 0}
+.choices label{display:flex;align-items:center;gap:10px;border:2px solid var(--line);border-radius:12px;padding:10px 12px;margin:6px 0;font-size:16px}
+.choices input{width:22px;height:22px;accent-color:var(--blue)}
+.choices label.sel{border-color:var(--blue);background:var(--pale)}
+.doc{white-space:pre-wrap;overflow-wrap:anywhere;font-size:15.5px;line-height:1.9;background:#F7FAFD;border:1px solid #DCE9F5;border-radius:12px;padding:14px;max-height:46vh;overflow:auto}
+details{border:2px solid var(--line);border-radius:14px;margin:10px 0;background:#fff}
+details summary{padding:12px 14px;font-weight:700;cursor:pointer;list-style:none}
+details summary::after{content:"開く ▾";float:right;color:var(--blue);font-weight:400;font-size:14px}
+details[open] summary::after{content:"閉じる ▴"}
+details .doc{margin:0 10px 12px}
+details.read{border-color:var(--blue)}details.read summary::before{content:"✓ ";color:var(--blue)}
+.check{display:flex;gap:12px;align-items:flex-start;margin:12px 0;padding:14px;border:3px solid var(--warn);background:#FFF8EC;border-radius:16px;font-weight:700;font-size:16px;line-height:1.6}
+.check input{width:28px;height:28px;flex:0 0 28px;accent-color:var(--blue);margin-top:1px}
+.check.done{border-color:var(--blue);background:var(--pale)}
+.photo{border:2px dashed var(--line);border-radius:14px;padding:14px;text-align:center;margin:10px 0;background:#F7FAFD}
+.photo img{max-width:100%;max-height:220px;border-radius:10px;display:block;margin:8px auto 0}
+.photo .btn{display:inline-block;background:#fff;border:2px solid var(--blue);color:var(--blue);border-radius:999px;padding:8px 18px;font-weight:700}
+.photo input{display:none}
+#sigPreview{display:block;width:100%;max-height:170px;object-fit:contain;border:2px solid var(--blue);border-radius:14px;background:#fff;margin:10px 0}
+.nav{position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,.96);box-shadow:0 -4px 16px rgba(20,40,79,.08);padding:10px 14px calc(10px + env(safe-area-inset-bottom))}
+.nav .in{max-width:640px;margin:0 auto;display:flex;gap:10px}
+button{font:inherit;font-weight:700;font-size:17px;border:0;border-radius:999px;padding:14px;cursor:pointer}
+.primary{flex:1;background:var(--green);color:#fff}.secondary{background:#fff;color:var(--blue);border:2px solid var(--blue);padding:12px 18px}
+button:disabled{opacity:.45}
+#msg{color:var(--err);font-weight:700;white-space:pre-wrap;text-align:center;margin:8px 0 0;font-size:15px}
+.sum dt{font-size:13px;color:#4a5f80;margin-top:8px}.sum dd{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+#overlay{position:fixed;inset:0;background:#fff;z-index:20;display:none;flex-direction:column;padding:12px 12px calc(12px + env(safe-area-inset-bottom));touch-action:none}
+#overlay.open{display:flex}#overlay p{margin:0 0 8px;text-align:center;font-weight:700}
+#pad{flex:1;width:100%;border:3px dashed var(--blue);border-radius:16px;background:#fff;touch-action:none}
+.row{display:flex;gap:10px;margin-top:10px}.row button{flex:1}
+.center{text-align:center}
+.done-mark{font-size:54px;text-align:center;color:var(--green);margin:6px 0}
+.test{background:#FFF1D6;color:#8a5a00;border-radius:10px;padding:8px 10px;font-size:13.5px;margin-top:10px;text-align:center}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main>
+  <div class="card">
+    <img class="logo" src="logo.png" alt="Squeeze Clinic">
+    <h1>はじめての方の受付</h1>
+    <p class="lead">問診・本人確認・同意を、この画面でまとめて行います（約10分）</p>
+    <div class="bar" id="bar"></div>
+    <div class="stepname" id="stepname"></div>
+    <div class="test" id="testNote" hidden>現在はテスト期間です。氏名に「テスト」を含む架空の方だけ受け付けています。</div>
+  </div>
+
+  <!-- 読み込み中 -->
+  <section class="card" data-step="loading"><p class="center" id="loadingText">読み込み中です…</p></section>
+
+  <!-- 受付済み -->
+  <section class="card" data-step="pending" hidden>
+    <div class="done-mark">✓</div>
+    <p class="center"><b>すでに受付済みです。</b><br>医師が内容を確認したら、このLINEでご連絡します。少しお待ちください。</p>
+    <button class="primary" style="width:100%" onclick="closeApp()">閉じる</button>
+  </section>
+
+  <!-- 1 基本情報 -->
+  <section class="card" data-step="1" hidden>
+    <h2>1．基本情報</h2>
+    <label class="f">当院の受診は初めてですか？<span class="req">必須</span></label>
+    <div class="choices" data-name="first">
+      <label><input type="radio" name="first" value="初めて" checked>初めて</label>
+      <label><input type="radio" name="first" value="受診したことがある">受診したことがある</label>
+    </div>
+    <div id="pidWrap" hidden><label class="f">患者ID<small>分かる方のみ</small></label><input type="text" id="patientId" placeholder="例：P0001"></div>
+    <label class="f">氏名<span class="req">必須</span></label><input type="text" id="name" autocomplete="name" placeholder="例：山田 花子">
+    <label class="f">フリガナ<span class="req">必須</span></label><input type="text" id="kana" placeholder="例：ヤマダ ハナコ">
+    <label class="f">生年月日<span class="req">必須</span></label><input type="date" id="birth" autocomplete="bday">
+    <p class="hint">18歳以上の方が対象です。</p>
+    <label class="f">電話番号<span class="req">必須</span></label><input type="tel" id="phone" autocomplete="tel" inputmode="numeric" placeholder="例：09012345678">
+    <label class="f">メールアドレス<span class="req">必須</span></label><input type="email" id="email" autocomplete="email" placeholder="例：hanako@example.com">
+    <p class="hint">お支払いの控えなどに使います。</p>
+    <label class="f">住所（お薬のお届け先）<span class="req">必須</span></label><textarea id="address" autocomplete="street-address" placeholder="郵便番号・建物名・部屋番号まで"></textarea>
+  </section>
+
+  <!-- 2 問診 -->
+  <section class="card" data-step="2" hidden>
+    <h2>2．問診</h2>
+    <label class="f">身長・現在の体重<span class="req">必須</span></label><input type="text" id="body" placeholder="例：165cm、70kg（分からなければ「不明」）">
+    <label class="f">相談したいお薬<span class="req">必須</span></label>
+    <div class="choices" data-name="drug"></div>
+    <label class="f">持病・治療中の病気<span class="req">必須</span></label><textarea id="disease" placeholder="ない場合は「なし」、分からない場合は「不明」"></textarea>
+    <label class="f">現在使用している薬・注射・サプリ<span class="req">必須</span></label><textarea id="meds" placeholder="分かる範囲で名前・量。ない場合は「なし」"></textarea>
+    <label class="f">アレルギー・薬による副作用歴<span class="req">必須</span></label><textarea id="allergy" placeholder="ある場合は原因と症状。ない場合は「なし」"></textarea>
+    <label class="f">妊娠・授乳等について<span class="req">必須</span></label>
+    <div class="choices" data-name="preg"></div>
+    <label class="f">現在の体調・相談したいこと<small>任意</small></label><textarea id="note" placeholder="体調の変化、過去に使った体重管理のお薬、今回の希望など"></textarea>
+  </section>
+
+  <!-- 3 本人確認書類 -->
+  <section class="card" data-step="3" hidden>
+    <h2>3．本人確認書類</h2>
+    <p>運転免許証・マイナンバーカード（表面のみ）・健康保険証などを、文字が読めるように撮影してください。</p>
+    <div class="photo"><b>表面</b><span class="req">必須</span><br><label class="btn">撮影・選択する<input type="file" accept="image/*" id="idFrontFile"></label><img id="idFrontImg" hidden alt="表面"></div>
+    <div class="photo"><b>裏面</b><small>（住所が裏面にある場合）</small><br><label class="btn">撮影・選択する<input type="file" accept="image/*" id="idBackFile"></label><img id="idBackImg" hidden alt="裏面"></div>
+    <p class="hint">マイナンバーカードの裏面（個人番号）は撮影しないでください。写真は診療の本人確認だけに使います。</p>
+  </section>
+
+  <!-- 4 説明書と同意 -->
+  <section class="card" data-step="4" hidden>
+    <h2>4．説明書の確認と同意</h2>
+    <p class="hint">それぞれ「開く」を押して、最後までお読みください。</p>
+    <div id="docs"></div>
+    <label class="check" id="c_online"><input type="checkbox" id="online"><span>オンライン診療の説明を確認し、オンライン診療での受診を希望します。</span></label>
+    <label class="check" id="c_privacy"><input type="checkbox" id="privacy"><span>個人情報の取扱方針を確認し、同意します。</span></label>
+    <label class="check" id="c_terms"><input type="checkbox" id="terms"><span>ご利用にあたっての重要事項に同意します。処方されたお薬を本人以外に譲渡・販売しません。</span></label>
+    <label class="f">診療の録音について<span class="req">必須</span></label>
+    <div class="choices" data-name="recording">
+      <label><input type="radio" name="recording" value="AGREE">録音に同意する</label>
+      <label><input type="radio" name="recording" value="DECLINE">録音に同意しない（診療は受けられます）</label>
+    </div>
+  </section>
+
+  <!-- 5 サイン -->
+  <section class="card" data-step="5" hidden>
+    <h2>5．電子サイン</h2>
+    <p>同意の証として、<b>ご本人のお名前</b>を指でサインしてください。</p>
+    <img id="sigPreview" hidden alt="サイン">
+    <button class="secondary" style="width:100%" onclick="openPad()">サインを書く</button>
+  </section>
+
+  <!-- 6 確認 -->
+  <section class="card" data-step="6" hidden>
+    <h2>6．入力内容の確認</h2>
+    <dl class="sum" id="summary"></dl>
+    <p class="hint">送信すると、医師が内容を確認します。処方の可否や薬の種類は、診察で決めます。</p>
+  </section>
+
+  <!-- 完了 -->
+  <section class="card" data-step="done" hidden>
+    <div class="done-mark">✓</div>
+    <p class="center"><b>受け付けました。</b><br>医師が内容を確認したら、このLINEでご連絡します。<br>その後、診察のご希望日時をLINEでお送りください。</p>
+    <button class="primary" style="width:100%" onclick="closeApp()">閉じる</button>
+  </section>
+
+  <p id="msg"></p>
+</main>
+
+<nav class="nav" id="nav" hidden><div class="in">
+  <button class="secondary" id="back" onclick="go(-1)">戻る</button>
+  <button class="primary" id="next" onclick="go(1)">次へ</button>
+</div></nav>
+
+<div id="overlay">
+  <p>枠の中に、お名前をサインしてください</p>
+  <canvas id="pad"></canvas>
+  <div class="row"><button class="secondary" onclick="clearPad()">書き直す</button><button class="secondary" onclick="closePad()">やめる</button><button class="primary" onclick="savePad()">決定</button></div>
+</div>
+
+<script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script>
+// ===== 設定（公開しても問題のない値だけ） =====
+const LIFF_ID = '2012825700-CZHVUTs6';
+const API_URL = 'https://script.google.com/macros/s/AKfycbw67yETG6erPpoj6Wd68Zr9lDquNDKVuE0sbCOlYS6tIqLJCApuBISpvu_V8g258KZ9Lw/exec';
+// ============================================
+const DRUGS = ['医師に相談して決めたい', 'マンジャロ', 'メトホルミン', 'ダパグリフロジン', '複数のお薬について相談したい'];
+const PREG = ['いずれも当てはまらない', '妊娠中・妊娠の可能性がある', '妊娠を希望・計画している', '授乳中', '複数当てはまる・診察時に相談したい'];
+const STEPS = ['基本情報', '問診', '本人確認書類', '説明書と同意', 'サイン', '確認'];
+const $ = id => document.getElementById(id);
+let step = 0, docs = [], docHash = '', idFront = '', idBack = '', signature = '', idToken = '';
+
+function choices(name, list) {
+  document.querySelector(`.choices[data-name="${name}"]`).innerHTML =
+    list.map(v => `<label><input type="radio" name="${name}" value="${v}">${v}</label>`).join('');
+}
+choices('drug', DRUGS); choices('preg', PREG);
+document.querySelectorAll('input[type=radio]:checked').forEach(r => r.closest('label').classList.add('sel'));
+document.addEventListener('change', e => {
+  if (e.target.type === 'radio') {
+    document.querySelectorAll(`input[name="${e.target.name}"]`).forEach(r => r.closest('label').classList.toggle('sel', r.checked));
+    if (e.target.name === 'first') $('pidWrap').hidden = e.target.value !== '受診したことがある';
+  }
+  if (e.target.type === 'checkbox') e.target.closest('.check')?.classList.toggle('done', e.target.checked);
+  saveDraft();
+});
+document.addEventListener('input', saveDraft);
+const radio = name => (document.querySelector(`input[name="${name}"]:checked`) || {}).value || '';
+
+// 入力途中のメモ（この端末だけ。写真・サインは保存しない）
+const FIELDS = ['patientId', 'name', 'kana', 'birth', 'phone', 'email', 'address', 'body', 'disease', 'meds', 'allergy', 'note'];
+function saveDraft() { try { const d = {}; FIELDS.forEach(k => d[k] = $(k).value); ['first', 'drug', 'preg'].forEach(k => d['r_' + k] = radio(k)); localStorage.setItem('sq_draft', JSON.stringify(d)); } catch (e) {} }
+function loadDraft() {
+  try {
+    const d = JSON.parse(localStorage.getItem('sq_draft') || 'null'); if (!d) return;
+    FIELDS.forEach(k => { if (d[k]) $(k).value = d[k]; });
+    ['first', 'drug', 'preg'].forEach(k => { const v = d['r_' + k]; const r = v && document.querySelector(`input[name="${k}"][value="${v}"]`); if (r) { r.checked = true; r.dispatchEvent(new Event('change', {bubbles: true})); } });
+  } catch (e) {}
+}
+
+function show(name) {
+  document.querySelectorAll('section[data-step]').forEach(s => s.hidden = s.dataset.step !== String(name));
+  const n = typeof name === 'number' ? name : 0;
+  $('bar').innerHTML = STEPS.map((_, i) => `<i class="${i < n ? 'on' : ''}"></i>`).join('');
+  $('stepname').textContent = n ? `${n} / ${STEPS.length}　${STEPS[n - 1]}` : '';
+  $('nav').hidden = !n;
+  if (n) { $('back').hidden = n === 1; $('next').textContent = n === STEPS.length ? 'この内容で送信する' : '次へ'; }
+  window.scrollTo(0, 0);
+}
+function msg(t) { $('msg').textContent = t || ''; }
+
+function validate(n) {
+  const v = id => $(id).value.trim();
+  if (n === 1) {
+    for (const [id, label] of [['name', '氏名'], ['kana', 'フリガナ'], ['birth', '生年月日'], ['phone', '電話番号'], ['email', 'メールアドレス'], ['address', '住所']]) if (!v(id)) return label + 'を入力してください。';
+    const b = new Date(v('birth')); const t = new Date(); let age = t.getFullYear() - b.getFullYear();
+    if (t.getMonth() < b.getMonth() || (t.getMonth() === b.getMonth() && t.getDate() < b.getDate())) age--;
+    if (!(age >= 18)) return '当院は18歳以上の方が対象です。';
+    if (!/^0\d{9,10}$/.test(v('phone').replace(/[^\d]/g, ''))) return '電話番号を確認してください。';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v('email'))) return 'メールアドレスを確認してください。';
+  }
+  if (n === 2) {
+    if (!v('body')) return '身長・体重を入力してください（分からなければ「不明」）。';
+    if (!radio('drug')) return '相談したいお薬を選んでください。';
+    for (const [id, label] of [['disease', '持病・治療中の病気'], ['meds', '使用している薬'], ['allergy', 'アレルギー・副作用歴']]) if (!v(id)) return label + 'を入力してください（ない場合は「なし」）。';
+    if (!radio('preg')) return '妊娠・授乳等について選んでください。';
+  }
+  if (n === 3 && !idFront) return '本人確認書類（表面）を撮影してください。';
+  if (n === 4) {
+    if (document.querySelectorAll('#docs details:not(.read)').length) return 'すべての説明書を開いてお読みください。';
+    if (!$('online').checked || !$('privacy').checked || !$('terms').checked) return '3つの確認項目すべてにチェックしてください。';
+    if (!radio('recording')) return '録音について選んでください。';
+  }
+  if (n === 5 && !signature) return 'サインを書いてください。';
+  return '';
+}
+function go(d) {
+  msg('');
+  if (d > 0) { const e = validate(step); if (e) { msg(e); return; } }
+  if (d > 0 && step === STEPS.length) { submit(); return; }
+  step = Math.min(Math.max(1, step + d), STEPS.length);
+  if (step === STEPS.length) summary();
+  show(step);
+}
+function summary() {
+  const rows = [['氏名', $('name').value + '（' + $('kana').value + '）'], ['生年月日', $('birth').value], ['電話', $('phone').value], ['メール', $('email').value], ['住所', $('address').value],
+    ['身長・体重', $('body').value], ['相談したいお薬', radio('drug')], ['持病', $('disease').value], ['使用中の薬', $('meds').value], ['アレルギー', $('allergy').value], ['妊娠・授乳', radio('preg')],
+    ['相談したいこと', $('note').value || '（なし）'], ['本人確認書類', idBack ? '表面・裏面' : '表面'], ['録音', radio('recording') === 'AGREE' ? '同意する' : '同意しない'], ['サイン', 'あり']];
+  $('summary').innerHTML = rows.map(([k, v]) => `<dt>${k}</dt><dd>${String(v).replace(/[&<>]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;'}[c]))}</dd>`).join('');
+}
+
+// 写真は端末側で縮小してから送る（長辺1600px・JPEG）
+function photo(inputId, imgId, set) {
+  $(inputId).addEventListener('change', e => {
+    const file = e.target.files[0]; if (!file) return;
+    const img = new Image(), url = URL.createObjectURL(file);
+    img.onload = () => {
+      const s = Math.min(1, 1600 / Math.max(img.width, img.height));
+      const c = document.createElement('canvas'); c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      const data = c.toDataURL('image/jpeg', 0.85); set(data); $(imgId).src = data; $(imgId).hidden = false; URL.revokeObjectURL(url);
+    };
+    img.onerror = () => msg('写真を読み込めませんでした。もう一度お試しください。');
+    img.src = url;
+  });
+}
+photo('idFrontFile', 'idFrontImg', d => idFront = d);
+photo('idBackFile', 'idBackImg', d => idBack = d);
+
+// サイン
+const pad = $('pad'); let ctx, drawing = false, pts = [], drawn = false;
+function setupPad() { const r = pad.getBoundingClientRect(), dpr = window.devicePixelRatio || 1; pad.width = r.width * dpr; pad.height = r.height * dpr; ctx = pad.getContext('2d'); ctx.scale(dpr, dpr); ctx.lineWidth = 3.2; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = '#14284F'; drawn = false; }
+function openPad() { $('overlay').classList.add('open'); document.body.style.overflow = 'hidden'; requestAnimationFrame(setupPad); }
+function closePad() { $('overlay').classList.remove('open'); document.body.style.overflow = ''; }
+function clearPad() { setupPad(); }
+const P = e => { const r = pad.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+pad.addEventListener('pointerdown', e => { drawing = true; pts = [P(e)]; pad.setPointerCapture(e.pointerId); e.preventDefault(); });
+pad.addEventListener('pointermove', e => {
+  if (!drawing) return; pts.push(P(e)); drawn = true;
+  if (pts.length > 2) { const [a, b, c] = pts.slice(-3); ctx.beginPath(); ctx.moveTo((a[0] + b[0]) / 2, (a[1] + b[1]) / 2); ctx.quadraticCurveTo(b[0], b[1], (b[0] + c[0]) / 2, (b[1] + c[1]) / 2); ctx.stroke(); }
+  e.preventDefault();
+});
+pad.addEventListener('pointerup', () => drawing = false);
+function savePad() {
+  if (!drawn) { alert('枠の中にサインしてください。'); return; }
+  // 小さめのPNGにする
+  const out = document.createElement('canvas'), w = 900, h = Math.round(900 * pad.height / pad.width);
+  out.width = w; out.height = h; const o = out.getContext('2d'); o.fillStyle = '#fff'; o.fillRect(0, 0, w, h); o.drawImage(pad, 0, 0, w, h);
+  signature = out.toDataURL('image/png'); $('sigPreview').src = signature; $('sigPreview').hidden = false; closePad();
+}
+
+const MOCK = new URLSearchParams(location.search).get('mock') === '1';
+async function api(body) {
+  if (MOCK) { await new Promise(r => setTimeout(r, 400)); return body.action === 'init' ? {testMode: true, pending: null, docHash: 'x', docs: ['オンライン診療の説明・同意書', '個人情報の取扱方針', 'ご利用にあたっての重要事項・同意書', '診療音声の録音について'].map((t, i) => ({key: 'K' + i, title: t, version: 'v1.0', text: '（画面確認用のダミー本文）\n'.repeat(12)}))} : {ok: true}; }
+  const res = await fetch(API_URL, {method: 'POST', body: JSON.stringify(body)});
+  const j = await res.json();
+  if (!j.ok) throw new Error(j.error || '処理できませんでした。');
+  return j.data;
+}
+function closeApp() { try { liff.closeWindow(); } catch (e) { window.close(); } }
+
+async function submit() {
+  $('next').disabled = $('back').disabled = true; msg('送信しています…（数秒かかります）');
+  try {
+    idToken = liff.getIDToken() || idToken;
+    const form = {first: radio('first'), patientId: $('patientId').value, name: $('name').value, kana: $('kana').value, birth: $('birth').value, phone: $('phone').value,
+      email: $('email').value, address: $('address').value, body: $('body').value, drug: radio('drug'), disease: $('disease').value, meds: $('meds').value,
+      allergy: $('allergy').value, preg: radio('preg'), note: $('note').value};
+    await api({action: 'submit', idToken, form, idFront, idBack, consent: {docHash, online: $('online').checked, privacy: $('privacy').checked, terms: $('terms').checked, recording: radio('recording'), signature}});
+    try { localStorage.removeItem('sq_draft'); } catch (e) {}
+    msg(''); step = 0; show('done');
+  } catch (e) {
+    msg(e.message); $('next').disabled = $('back').disabled = false;
+  }
+}
+
+async function start() {
+  try {
+    if (MOCK) { window.liff = window.liff || {}; liff.getIDToken = () => 'mock'; liff.closeWindow = () => {}; }
+    else if (LIFF_ID.startsWith('__')) throw new Error('準備中です（LIFF IDが未設定）。');
+    if (!MOCK) await liff.init({liffId: LIFF_ID});
+    if (!MOCK && !liff.isLoggedIn()) { liff.login({redirectUri: location.href}); return; }
+    idToken = MOCK ? 'mock' : liff.getIDToken();
+    const data = await api({action: 'init', idToken});
+    if (data.testMode) $('testNote').hidden = false;
+    if (data.pending) { show('pending'); return; }
+    docs = data.docs; docHash = data.docHash;
+    $('docs').innerHTML = docs.map((d, i) => `<details data-i="${i}"><summary>${d.title}</summary><div class="doc"></div></details>`).join('');
+    document.querySelectorAll('#docs details').forEach(el => {
+      const d = docs[el.dataset.i]; el.querySelector('.doc').textContent = d.text + '\n\n（文書の版：' + d.version + '）';
+      el.addEventListener('toggle', () => { if (el.open) el.classList.add('read'); });
+    });
+    loadDraft(); step = 1; show(1);
+  } catch (e) {
+    $('loadingText').textContent = e.message || '読み込めませんでした。LINEから開き直してください。';
+  }
+}
+start();
+</script>
+</body>
+</html>
