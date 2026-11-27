@@ -29,6 +29,13 @@ input:focus,textarea:focus,select:focus{outline:3px solid #BFDBF7}
 .pair{display:flex;align-items:center;gap:8px}.pair select{flex:1}.pair span{font-weight:700}
 .chips{display:flex;gap:8px;margin:2px 0 6px}.chips button{flex:1;background:#fff;color:var(--navy);border:2px solid var(--line);padding:10px 4px;font-size:16px;border-radius:12px}
 .chips button.on{border-color:var(--blue);background:var(--blue);color:#fff}
+.daytabs{display:flex;gap:6px;overflow-x:auto;padding:4px 0 8px;-webkit-overflow-scrolling:touch}
+.daytabs button{flex:0 0 auto;background:#fff;color:var(--navy);border:2px solid var(--line);border-radius:12px;padding:8px 10px;font-size:14px;line-height:1.3}
+.daytabs button.on{background:var(--blue);border-color:var(--blue);color:#fff}
+.slots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px}
+.slots button{background:#fff;border:2px solid var(--line);color:var(--navy);border-radius:12px;padding:12px 4px;font-size:16px}
+.booked{border:3px solid var(--blue);background:var(--pale);border-radius:16px;padding:14px;margin:6px 0 14px}
+.booked b{font-size:18px}
 .need{display:block;font-size:13.5px;font-weight:600;color:#B7791F;margin-top:2px}
 html.signing,html.signing body{overflow:hidden;overscroll-behavior:none;position:fixed;inset:0;width:100%}
 .doc{white-space:pre-wrap;overflow-wrap:anywhere;font-size:15.5px;line-height:1.9;background:#F7FAFD;border:1px solid #DCE9F5;border-radius:12px;padding:14px;max-height:46vh;overflow:auto}
@@ -76,6 +83,17 @@ button:disabled{opacity:.45}
 
   <!-- 読み込み中 -->
   <section class="card" data-step="loading"><p class="center" id="loadingText">読み込み中です…</p></section>
+
+  <!-- 予約 -->
+  <section class="card" data-step="book" hidden>
+    <h2>診察日時のご予約</h2>
+    <div id="bookCurrent"></div>
+    <div id="bookPick">
+      <p class="hint">ご都合のよい時間を1つ選んでください（1回 <span id="bookMin">20</span>分・ビデオ通話）。医師が確認して確定したら、このLINEでお知らせします。</p>
+      <div class="daytabs" id="bookDays"></div>
+      <div class="slots" id="bookSlots"></div>
+    </div>
+  </section>
 
   <!-- 受付済み -->
   <section class="card" data-step="pending" hidden>
@@ -243,6 +261,7 @@ function show(name) {
   $('bar').innerHTML = STEPS.map((_, i) => `<i class="${i < n ? 'on' : ''}"></i>`).join('');
   $('stepname').textContent = n ? `${n} / ${STEPS.length}　${STEPS[n - 1]}` : '';
   $('nav').hidden = !n;
+  $('stepname').hidden = $('bar').hidden = name === 'book';
   if (n) { $('back').hidden = n === 1; $('next').textContent = n === STEPS.length ? 'この内容で送信する' : '次へ'; }
   window.scrollTo(0, 0);
 }
@@ -343,6 +362,48 @@ async function api(body) {
   if (!j.ok) throw new Error(j.error || '処理できませんでした。');
   return j.data;
 }
+// ---- 予約 ----
+const VIEW = new URLSearchParams(location.search).get('view');
+let bookData = null, bookDay = '';
+async function bookStart() {
+  if (MOCK) { const t = Date.now() + 86400000; bookData = {current: null, minutes: 20, testMode: true, days: [0, 1, 2].map(i => ({key: 'd' + i, label: (12 + i) + '月' + (1 + i) + '日（' + '水木金'[i] + '）', slots: ['20:00', '20:20', '20:40', '21:00', '翌0:20'].map((l, j) => ({start: t + i * 86400000 + j * 1200000, label: l}))}))}; }
+  else bookData = await api({action: 'book_init', idToken});
+  document.querySelector('h1').textContent = '診察のご予約'; document.querySelector('.lead').textContent = 'ビデオ通話での診察日時を選べます'; document.title = '診察のご予約｜Squeeze Clinic';
+  bookRender(); show('book');
+}
+function bookRender() {
+  $('bookMin').textContent = bookData.minutes;
+  const c = bookData.current;
+  $('bookCurrent').innerHTML = '';
+  if (c) {
+    const box = document.createElement('div'); box.className = 'booked';
+    box.innerHTML = (c.state === '確定' ? '<b>ご予約は確定しています</b>' : '<b>医師の確認待ちです</b>') + '<br>' + c.label +
+      (c.state === '確定' ? '<p class="hint">時間になりましたら、このLINEにビデオ通話でおかけします。変更はこのLINEでお知らせください。</p>' : '<p class="hint">別の時間に変えたいときは、下から選び直してください（今の申し込みは取り消されます）。</p>');
+    if (c.state === '承認待ち') { const b = document.createElement('button'); b.className = 'secondary'; b.style.width = '100%'; b.textContent = '申し込みを取り消す'; b.onclick = bookCancel; box.appendChild(b); }
+    $('bookCurrent').appendChild(box);
+  }
+  $('bookPick').hidden = !!(c && c.state === '確定');
+  if (!bookData.days.length) { $('bookDays').innerHTML = ''; $('bookSlots').innerHTML = '<p class="hint" style="grid-column:1/-1">現在、ご予約いただける空き時間がありません。このLINEでご相談ください。</p>'; return; }
+  if (!bookData.days.some(d => d.key === bookDay)) bookDay = bookData.days[0].key;
+  $('bookDays').innerHTML = '';
+  bookData.days.forEach(d => { const b = document.createElement('button'); b.textContent = d.label; b.className = d.key === bookDay ? 'on' : ''; b.onclick = () => { bookDay = d.key; bookRender(); }; $('bookDays').appendChild(b); });
+  $('bookSlots').innerHTML = '';
+  bookData.days.find(d => d.key === bookDay).slots.forEach(sl => { const b = document.createElement('button'); b.textContent = sl.label; b.onclick = () => bookRequest(sl, b); $('bookSlots').appendChild(b); });
+}
+async function bookRequest(sl, btn) {
+  const day = bookData.days.find(d => d.key === bookDay).label;
+  if (!confirm(day + ' ' + sl.label + ' で申し込みますか？\n（医師が確認して確定します）')) return;
+  btn.disabled = true; msg('送信しています…');
+  try {
+    const r = MOCK ? {label: day + sl.label, message: 'ご希望を受け付けました。'} : await api({action: 'book_request', idToken: liff.getIDToken() || idToken, start: sl.start});
+    msg(''); alert(r.message + '\n' + r.label);
+    await bookStart();
+  } catch (e) { msg(e.message); btn.disabled = false; }
+}
+async function bookCancel() {
+  if (!confirm('申し込みを取り消しますか？')) return;
+  try { const r = await api({action: 'book_cancel', idToken: liff.getIDToken() || idToken}); alert(r.message); await bookStart(); } catch (e) { msg(e.message); }
+}
 function closeApp() { try { liff.closeWindow(); } catch (e) { window.close(); } }
 
 async function submit() {
@@ -367,6 +428,7 @@ async function start() {
     if (!MOCK) await liff.init({liffId: LIFF_ID});
     if (!MOCK && !liff.isLoggedIn()) { liff.login({redirectUri: location.href}); return; }
     idToken = MOCK ? 'mock' : liff.getIDToken();
+    if (VIEW === 'book') { await bookStart(); return; }
     const data = await api({action: 'init', idToken});
     if (data.testMode) $('testNote').hidden = false;
     docs = data.docs; docHash = data.docHash;
