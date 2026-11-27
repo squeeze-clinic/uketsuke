@@ -77,6 +77,8 @@ button:disabled{opacity:.45}
     <div class="done-mark">✓</div>
     <p class="center"><b>すでに受付済みです。</b><br>医師が内容を確認したら、このLINEでご連絡します。少しお待ちください。</p>
     <button class="primary" style="width:100%" onclick="closeApp()">閉じる</button>
+    <p class="hint center" style="margin-top:14px" id="redoWrap">入力を間違えた場合は、送り直すことができます（前の受付は取り消されます）。</p>
+    <button class="secondary" style="width:100%" id="redoBtn" onclick="redo()">内容を直して送り直す</button>
   </section>
 
   <!-- 1 基本情報 -->
@@ -337,16 +339,22 @@ async function start() {
     idToken = MOCK ? 'mock' : liff.getIDToken();
     const data = await api({action: 'init', idToken});
     if (data.testMode) $('testNote').hidden = false;
-    if (data.pending) { show('pending'); return; }
     docs = data.docs; docHash = data.docHash;
+    if (data.pending) { if (data.pending.importing) { $('redoWrap').hidden = $('redoBtn').hidden = true; } show('pending'); return; }
+    setupDocs();
+  } catch (e) {
+    $('loadingText').textContent = e.message || '読み込めませんでした。LINEから開き直してください。';
+  }
+}
+function redo() { setupDocs(); }
+function setupDocs() {
+  {
     $('docs').innerHTML = docs.map((d, i) => `<details data-i="${i}"><summary>${d.title}</summary><div class="doc"></div></details>`).join('');
     document.querySelectorAll('#docs details').forEach(el => {
       const d = docs[el.dataset.i]; el.querySelector('.doc').textContent = d.text + '\n\n（文書の版：' + d.version + '）';
       el.addEventListener('toggle', () => { if (el.open) el.classList.add('read'); });
     });
     loadDraft(); step = 1; show(1);
-  } catch (e) {
-    $('loadingText').textContent = e.message || '読み込めませんでした。LINEから開き直してください。';
   }
 }
 start();
