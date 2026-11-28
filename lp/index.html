@@ -54,14 +54,21 @@ footer a{color:var(--gray)}
 </style>
 <!-- Meta ピクセル（PIXEL_ID が入ったときだけ動く） -->
 <script>
-var PIXEL_ID = '';
+var PIXEL_ID = '1745362570340581';
 if (PIXEL_ID) {
   !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};
   if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;
   s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
   fbq('init', PIXEL_ID); fbq('track', 'PageView');
 }
-function addFriend(where){ try { if (window.fbq) fbq('track', 'Lead', {content_name: 'LINE友だち追加', content_category: where}); } catch (e) {} }
+// LINEボタン：計測を送ってから（最大0.4秒待って）LINEを開く。計測が使えないときはすぐ開く
+function addFriend(where, a){
+  if (!window.fbq) return true;
+  var go = function(){ if (go.done) return; go.done = true; location.href = a.href; };
+  try { fbq('track', 'Lead', {content_name: 'LINE友だち追加', content_category: where}); } catch (e) { return true; }
+  setTimeout(go, 400);
+  return false;
+}
 </script>
 </head>
 <body>
@@ -70,7 +77,7 @@ function addFriend(where){ try { if (window.fbq) fbq('track', 'Lead', {content_n
     <div class="logo"><img src="logo.jpg" alt="Squeeze Clinic"></div>
     <h1 class="mincho">体重のご相談、<br>LINEで医師に。</h1>
     <p class="sub">夜20時から、ビデオ通話で診察します。</p>
-    <a class="btn" href="https://line.me/R/ti/p/@887vpmbj" onclick="addFriend('hero')">
+    <a class="btn" href="https://line.me/R/ti/p/@887vpmbj" onclick="return addFriend('hero', this)">
       <svg viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M12 3C6.5 3 2 6.6 2 11c0 3.9 3.5 7.2 8.3 7.9.3.1.8.2.9.5.1.3.1.7 0 1l-.1.9c0 .3-.2 1 .9.5s5.9-3.5 8-6c1.5-1.6 2-3.2 2-4.8C22 6.6 17.5 3 12 3z"/></svg>
       LINEで友だち追加して受診する
     </a>
@@ -138,6 +145,6 @@ function addFriend(where){ try { if (window.fbq) fbq('track', 'Lead', {content_n
     <p>© Squeeze Clinic</p>
   </footer>
 </div>
-<div class="sticky"><a class="btn" href="https://line.me/R/ti/p/@887vpmbj" onclick="addFriend('sticky')">LINEで友だち追加</a></div>
+<div class="sticky"><a class="btn" href="https://line.me/R/ti/p/@887vpmbj" onclick="return addFriend('sticky', this)">LINEで友だち追加</a></div>
 </body>
 </html>
